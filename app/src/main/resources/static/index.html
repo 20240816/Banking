@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Management App</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Product Management App</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/products">Products</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container mt-4">
+      <h1>Welcome to the Product Management App</h1>
+      <p>This is a web application for managing products.</p>
+      <p>
+        Here, you can view a list of products, add new products, update existing
+        products, and delete products.
+      </p>
+      <button class="btn btn-primary" onclick="getProducts()">
+        View Products
+      </button>
+
+      <div class="mt-4">
+        <h2>Add Product</h2>
+        <form onsubmit="event.preventDefault(); addProduct()">
+          <div class="form-group">
+            <label for="nameInput">Name:</label>
+            <input type="text" id="nameInput" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="priceInput">Price:</label>
+            <input
+              type="number"
+              id="priceInput"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="quantityInput">Quantity:</label>
+            <input
+              type="number"
+              id="quantityInput"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Add Product</button>
+        </form>
+      </div>
+
+      <table class="table mt-4 d-none" id="productTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      function getProducts() {
+        fetch("/api/v1/products")
+          .then((response) => response.json())
+          .then((products) => {
+            const tableBody = document.getElementById("productTableBody");
+            tableBody.innerHTML = "";
+
+            if (products.length === 0) {
+              tableBody.innerHTML =
+                '<tr><td colspan="4" align="center">No products available</td></tr>';
+            } else {
+              products.forEach((product) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>${product.price}</td>
+                            <td>${product.quantity}</td>
+                        `;
+                tableBody.appendChild(row);
+              });
+            }
+
+            document.getElementById("productTable").classList.remove("d-none");
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function addProduct() {
+        const name = document.getElementById("nameInput").value;
+        const price = parseFloat(document.getElementById("priceInput").value);
+        const quantity = parseInt(
+          document.getElementById("quantityInput").value
+        );
+
+        const product = {
+          name: name,
+          price: price,
+          quantity: quantity,
+        };
+
+        fetch("/api/v1/product", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(product),
+        })
+          .then((response) => response.json())
+          .then((newProduct) => {
+            console.log("New Product:", newProduct);
+            resetForm();
+            getProducts();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function resetForm() {
+        document.getElementById("nameInput").value = "";
+        document.getElementById("priceInput").value = "";
+        document.getElementById("quantityInput").value = "";
+      }
+    </script>
+  </body>
+</html>
