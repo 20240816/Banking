@@ -160,7 +160,7 @@ function transferFunds() {
         })
         .catch((error) => {
             console.error("Error:", error);
-            showFeedbackModal("An error occurred during the transfer", false);
+            showFeedbackModal("An error occurred during the transfer. Do you have enough funds?", false);
         });
 
     getAccountsTable();
@@ -208,6 +208,13 @@ function resetForms() {
     document.getElementById("accountNameInput").value = "";
     document.getElementById("initialBalanceInput").value = "";
     document.getElementById("transferAmountInput").value = "";
+}
+
+function formatCurrencyInput(inputElement) {
+    inputElement.value = inputElement.value
+        .replace(/[^0-9\.]/g, '')
+        .replace(/\.(.*)\./g, '$1')
+        .replace(/\.(.*)$/, (match, group) => group.length > 2 ? '.' + group.substring(0, 2) : match);
 }
 
 populateTransactionsAccountSelect();

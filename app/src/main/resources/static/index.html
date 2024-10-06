@@ -111,7 +111,7 @@
               class="form-control"
               placeholder="NZD"
               required
-              oninput="this.value = this.value.replace(/[^0-9\.]/g, '').replace(/\.(.*)\./g, '$1').replace(/\.(.*)$/, (match, group) => group.length > 2 ? '.' + group.substring(0, 2) : match)"
+              oninput="formatCurrencyInput(this)"
             />
           </div>
         </div>
@@ -139,7 +139,7 @@
               class="form-control"
               placeholder="NZD"
               required
-              oninput="this.value = this.value.replace(/[^0-9\.]/g, '').replace(/\.(.*)\./g, '$1').replace(/\.(.*)$/, (match, group) => group.length > 2 ? '.' + group.substring(0, 2) : match)"
+              oninput="formatCurrencyInput(this)"
             />
           </div>
         </div>
