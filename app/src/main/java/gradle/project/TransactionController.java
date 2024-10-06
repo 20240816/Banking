@@ -22,8 +22,11 @@ public class TransactionController {
         }
 
         @GetMapping("/transactions")
-        public ResponseEntity<List<TransactionView>> getAllTransactions() {
+        public ResponseEntity<List<TransactionView>> getAllTransactions(@RequestParam(required = false) Long account) {
                 List<Transaction> transactions = transactionRepository.findAll();
+                if (account != null) transactions = transactions.stream()
+                        .filter(transaction -> transaction.getFromAccount().equals(account) || transaction.getToAccount().equals(account))
+                        .collect(Collectors.toList());
                 List<TransactionView> response = transactions.stream()
                                 .map(transaction -> {
                                         String fromAccountName = accountRepository

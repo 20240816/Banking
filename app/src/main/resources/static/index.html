@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Banking Application</title>
+    <title>Banking</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/arcade/64/pay.png">
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -84,10 +85,17 @@
         border-radius: 5px;
         margin-bottom: 15px;
       }
+
+      .dollar-symbol {
+        margin-right: 5px;
+        font-size: 16px;
+        color: #666;
+      }
     </style>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </head>
+
   <body>
     <nav class="navbar navbar-expand-lg navbar-light">
       <a class="navbar-brand" href="#" onclick="showSection('main')">Banking</a>
@@ -122,14 +130,14 @@
         </ul>
       </div>
     </nav>
-
     <div class="container mt-4" id="mainContent">
       <h1>Welcome to the Banking App</h1>
       <p>This is a web application for managing bank accounts.</p>
     </div>
-
     <div class="container mt-4 d-none" id="accountsListSection">
-      <div class="section-header"><h2>Your Accounts</h2></div>
+      <div class="section-header">
+        <h2>Your Accounts</h2>
+      </div>
       <table class="table" id="accountTable">
         <thead>
           <tr>
@@ -141,9 +149,10 @@
         <tbody id="accountTableBody"></tbody>
       </table>
     </div>
-
     <div class="container mt-4 d-none" id="addAccountSection">
-      <div class="section-header"><h2>Add Account</h2></div>
+      <div class="section-header">
+        <h2>Add Account</h2>
+      </div>
       <form onsubmit="event.preventDefault(); addAccount()">
         <div class="form-group">
           <label for="accountNameInput">Account Name:</label
@@ -155,20 +164,26 @@
           />
         </div>
         <div class="form-group">
-          <label for="initialBalanceInput">Initial Balance:</label
-          ><input
-            type="number"
-            id="initialBalanceInput"
-            class="form-control"
-            required
-          />
+          <label for="initialBalanceInput">Initial Balance:</label>
+          <div class="d-flex">
+            <span class="dollar-symbol">$</span>
+            <input
+              type="text"
+              id="initialBalanceInput"
+              class="form-control"
+              placeholder="NZD"
+              required
+              oninput="this.value = this.value.replace(/[^0-9\.]/g, '').replace(/\.(.*)\./g, '$1').replace(/\.(.*)$/, (match, group) => group.length > 2 ? '.' + group.substring(0, 2) : match)"
+            />
+          </div>
         </div>
         <button type="submit" class="btn btn-custom">Add Account</button>
       </form>
     </div>
-
     <div class="container mt-4 d-none" id="transferFundsSection">
-      <div class="section-header"><h2>Transfer Funds</h2></div>
+      <div class="section-header">
+        <h2>Transfer Funds</h2>
+      </div>
       <form onsubmit="event.preventDefault(); transferFunds()">
         <div class="form-group">
           <label for="fromAccountSelect">From Account:</label
@@ -183,20 +198,28 @@
           ><select id="toAccountSelect" class="form-control" required></select>
         </div>
         <div class="form-group">
-          <label for="transferAmountInput">Amount:</label
-          ><input
-            type="number"
-            id="transferAmountInput"
-            class="form-control"
-            required
-          />
+          <label for="transferAmountInput">Amount:</label>
+          <div class="d-flex">
+            <span class="dollar-symbol">$</span>
+            <input
+              type="text"
+              id="transferAmountInput"
+              class="form-control"
+              placeholder="NZD"
+              required
+              oninput="this.value = this.value.replace(/[^0-9\.]/g, '').replace(/\.(.*)\./g, '$1').replace(/\.(.*)$/, (match, group) => group.length > 2 ? '.' + group.substring(0, 2) : match)"
+            />
+          </div>
         </div>
         <button type="submit" class="btn btn-custom">Transfer</button>
       </form>
     </div>
-
     <div class="container mt-4 d-none" id="transactionHistorySection">
-      <div class="section-header"><h2>Transaction History</h2></div>
+      <div class="section-header">
+        <h2>Transaction History</h2>
+      </div>
+      <label for="transactionsAccountSelect">Account:</label>
+      <select id="transactionsAccountSelect" class="form-control"></select>
       <table class="table" id="transactionTable">
         <thead>
           <tr>
@@ -210,7 +233,6 @@
         <tbody id="transactionTableBody"></tbody>
       </table>
     </div>
-
     <script>
       let accounts = [];
 
@@ -234,7 +256,7 @@
             document
               .getElementById("addAccountSection")
               .classList.remove("d-none");
-            getAccounts();
+            getAccountsTable();
             break;
           case "transfer":
             document
@@ -246,7 +268,10 @@
             document
               .getElementById("transactionHistorySection")
               .classList.remove("d-none");
-            getTransactions();
+            populateTransactionsAccountSelect();
+            getTransactions(
+              document.getElementById("transactionsAccountSelect").value
+            );
             break;
         }
         document
@@ -267,22 +292,46 @@
       }
 
       function getAccounts() {
-        fetch("/api/v1/accounts")
+        return fetch("/api/v1/accounts")
           .then((response) => response.json())
           .then((data) => {
             accounts = data;
-            const tableBody = document.getElementById("accountTableBody");
-            tableBody.innerHTML =
-              accounts.length === 0
-                ? '<tr><td colspan="3" align="center">No accounts available</td></tr>'
-                : accounts
-                    .map(
-                      (account) =>
-                        `<tr><td>${account.id}</td><td>${account.name}</td><td>${account.balance}</td></tr>`
-                    )
-                    .join("");
           })
           .catch((error) => console.error("Error:", error));
+      }
+
+      function getAccountsTable() {
+        getAccounts();
+        const tableBody = document.getElementById("accountTableBody");
+        const tableBodyHtml =
+          accounts.length === 0
+            ? '<tr><td colspan="3" align="center">No accounts available</td></tr>'
+            : accounts
+                .map(
+                  (account) =>
+                    `<tr><td>${account.id}</td><td>${
+                      account.name
+                    }</td><td>${currencyFormat(account.balance)}</td></tr>`
+                )
+                .join("");
+        tableBody.innerHTML = tableBodyHtml;
+      }
+
+      function currencyFormat(amount) {
+        return new Intl.NumberFormat("en-NZ", {
+          style: "currency",
+          currency: "NZD",
+        }).format(amount);
+      }
+
+      function getAccountsSelectOptions() {
+        getAccounts();
+        return accounts
+          .map(
+            (account) =>
+              `<option value="${account.id}">${account.id} - ${account.name}</option>`
+          )
+          .join("");
       }
 
       function populateAccountSelects() {
@@ -297,6 +346,16 @@
                 `<option value="${account.id}">${account.id} - ${account.name}</option>`
             )
             .join("");
+        });
+      }
+
+      function populateTransactionsAccountSelect() {
+        const selectElements = [
+          document.getElementById("transactionsAccountSelect"),
+        ];
+        const defaultAllOption = `<option value="">All</option>`;
+        selectElements.forEach((select) => {
+          select.innerHTML = defaultAllOption + getAccountsSelectOptions();
         });
       }
 
@@ -317,8 +376,8 @@
             response.ok ? response.json() : Promise.reject()
           )
           .then((newAccount) => {
+            getAccountsTable();
             resetForms();
-            getAccounts();
           })
           .catch((error) => console.error("Error:", error));
       }
@@ -339,13 +398,18 @@
         })
           .then(() => {
             resetForms();
-            getTransactions();
           })
           .catch((error) => console.error("Error:", error));
+
+        getAccountsTable();
+        getTransactions();
       }
 
-      function getTransactions() {
-        fetch("/api/v1/transactions")
+      function getTransactions(account = null) {
+        const fetchUrl = account
+          ? "/api/v1/transactions?account=" + account
+          : "/api/v1/transactions";
+        fetch(fetchUrl)
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -368,7 +432,7 @@
                         <td>${transaction.id}</td>
                         <td>${transaction.fromAccountName}</td>
                         <td>${transaction.toAccountName}</td>
-                        <td>${transaction.amount}</td>
+                        <td>${currencyFormat(transaction.amount)}</td>
                         <td>${new Date(transaction.date).toLocaleString()}</td>
                     </tr>
                 `
@@ -381,10 +445,17 @@
       function resetForms() {
         document.getElementById("accountNameInput").value = "";
         document.getElementById("initialBalanceInput").value = "";
-        document.getElementById("fromAccountSelect").selectedIndex = 0;
-        document.getElementById("toAccountSelect").selectedIndex = 0;
         document.getElementById("transferAmountInput").value = "";
       }
+
+      populateTransactionsAccountSelect();
+      document
+        .getElementById("transactionsAccountSelect")
+        .addEventListener("change", function () {
+          getTransactions(
+            document.getElementById("transactionsAccountSelect").value
+          );
+        });
     </script>
   </body>
 </html>
