@@ -239,15 +239,15 @@
     </div>
     <div
       class="modal fade"
-      id="successModal"
+      id="feedbackModal"
       tabindex="-1"
-      aria-labelledby="successModalLabel"
+      aria-labelledby="feedbackModalLabel"
       aria-hidden="true"
     >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="successModalLabel">Success</h5>
+            <h5 class="modal-title" id="feedbackModalLabel">Message</h5>
             <button
               type="button"
               class="close"
@@ -257,9 +257,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body" id="successMessage">
-            Operation was successful.
-          </div>
+          <div class="modal-body" id="feedbackMessage">...</div>
           <div class="modal-footer">
             <button
               type="button"
@@ -411,15 +409,27 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(account),
         })
-          .then((response) =>
-            response.ok ? response.json() : Promise.reject()
-          )
-          .then((newAccount) => {
+          .then((response) => {
+            if (!response.ok) {
+              return response
+                .text()
+                .then((errorText) => Promise.reject(new Error(errorText)));
+            }
+
+            return response.json();
+          })
+          .then(() => {
             getAccountsTable();
             resetForms();
-            showSuccessModal("Account added successfully!");
+            showFeedbackModal("Account added successfully!", true);
           })
-          .catch((error) => console.error("Error:", error));
+          .catch((error) => {
+            console.error("Error:", error);
+            showFeedbackModal(
+              "An error occurred while adding the account",
+              false
+            );
+          });
       }
 
       function transferFunds() {
@@ -436,19 +446,47 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(transferData),
         })
-          .then(() => {
-            resetForms();
-            showSuccessModal("Transfer completed successfully!");
+          .then((response) => {
+            if (!response.ok) {
+              return response
+                .text()
+                .then((errorText) => Promise.reject(new Error(errorText)));
+            }
+
+            const contentType = response.headers.get("content-type");
+
+            if (contentType && contentType.includes("application/json")) {
+              return response.json();
+            } else {
+              return response.text();
+            }
           })
-          .catch((error) => console.error("Error:", error));
+          .then((data) => {
+            resetForms();
+            showFeedbackModal(
+              typeof data === "string"
+                ? data
+                : "Transfer completed successfully!",
+              true
+            );
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showFeedbackModal("An error occurred during the transfer", false);
+          });
 
         getAccountsTable();
         getTransactions();
       }
 
-      function showSuccessModal(message) {
-        document.getElementById("successMessage").textContent = message;
-        $("#successModal").modal("show");
+      function showFeedbackModal(message, isSuccess) {
+        const modalTitle = isSuccess ? "Success" : "Error";
+        const modalElement = $("#feedbackModal");
+
+        document.getElementById("feedbackModalLabel").textContent = modalTitle;
+        document.getElementById("feedbackMessage").textContent = message;
+
+        modalElement.modal("show");
       }
 
       function getTransactions(account = null) {
