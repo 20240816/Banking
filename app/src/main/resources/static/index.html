@@ -103,17 +103,14 @@
         </div>
         <div class="form-group">
           <label for="initialBalanceInput">Initial Balance:</label>
-          <div class="d-flex">
-            <span class="dollar-symbol">$</span>
-            <input
-              type="text"
-              id="initialBalanceInput"
-              class="form-control"
-              placeholder="NZD"
-              required
-              oninput="formatCurrencyInput(this)"
-            />
-          </div>
+          <input
+            type="text"
+            id="initialBalanceInput"
+            class="form-control"
+            placeholder="$"
+            required
+            oninput="formatCurrencyInput(this)"
+          />
         </div>
         <button type="submit" class="btn btn-custom">Add Account</button>
       </form>
@@ -131,17 +128,14 @@
         </div>
         <div class="form-group">
           <label for="transferAmountInput">Amount:</label>
-          <div class="d-flex">
-            <span class="dollar-symbol">$</span>
-            <input
-              type="text"
-              id="transferAmountInput"
-              class="form-control"
-              placeholder="NZD"
-              required
-              oninput="formatCurrencyInput(this)"
-            />
-          </div>
+          <input
+            type="text"
+            id="transferAmountInput"
+            class="form-control"
+            placeholder="$"
+            required
+            oninput="formatCurrencyInput(this)"
+          />
         </div>
         <button type="submit" class="btn btn-custom">Transfer</button>
       </form>

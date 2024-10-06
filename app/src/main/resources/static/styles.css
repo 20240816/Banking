@@ -55,6 +55,12 @@ h2 {
     font-weight: 600;
 }
 
+#mainContent {
+    h1 {
+        margin-left: 0;
+    }
+}
+
 .btn-custom {
     background-color: #1a124d;
     color: #ffffff;
@@ -72,12 +78,6 @@ h2 {
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 15px;
-}
-
-.dollar-symbol {
-    margin-right: 5px;
-    font-size: 16px;
-    color: #666;
 }
 
 #transactionsAccountSelect {
