@@ -1,0 +1,89 @@
+body {
+    background-color: #ffffff;
+    color: #1a124d;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    line-height: 30px;
+}
+
+.navbar {
+    background-color: #c6fff6;
+}
+
+.navbar-brand {
+    font-family: Georgia, serif;
+    color: #1a124d;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.nav-link {
+    color: #1a124d;
+    position: relative;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    padding-bottom: 5px;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #1a124d;
+}
+
+.nav-link::after {
+    content: "";
+    display: block;
+    height: 3px;
+    width: 0;
+    background: #007c4e;
+    transition: width 0.4s ease;
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+h1,
+h2 {
+    color: #1a124d;
+    margin-left: 20px;
+    font-weight: 600;
+}
+
+.btn-custom {
+    background-color: #1a124d;
+    color: #ffffff;
+    border-radius: 25px;
+    transition: background-color 0.4s ease;
+}
+
+.btn-custom:hover {
+    background-color: #afa5e0;
+    color: #ffffff;
+}
+
+.section-header {
+    background-color: #c6fff6;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.dollar-symbol {
+    margin-right: 5px;
+    font-size: 16px;
+    color: #666;
+}
+
+#transactionsAccountSelect {
+    margin-bottom: 20px;
+}
+
+#addAccountSection {
+    margin-bottom: 20px;
+}

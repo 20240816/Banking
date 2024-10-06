@@ -13,97 +13,8 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-    <style>
-      body {
-        background-color: #ffffff;
-        color: #1a124d;
-        font-family: "Open Sans", Arial, Helvetica, sans-serif;
-        font-size: 20px;
-        line-height: 30px;
-      }
-
-      .navbar {
-        background-color: #c6fff6;
-      }
-
-      .navbar-brand {
-        font-family: Georgia, serif;
-        color: #1a124d;
-        font-size: 36px;
-        font-weight: bold;
-      }
-
-      .nav-link {
-        color: #1a124d;
-        position: relative;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 16px;
-        padding-bottom: 5px;
-        transition: color 0.3s;
-      }
-
-      .nav-link:hover {
-        color: #1a124d;
-      }
-
-      .nav-link::after {
-        content: "";
-        display: block;
-        height: 3px;
-        width: 0;
-        background: #007c4e;
-        transition: width 0.4s ease;
-        position: absolute;
-        left: 0;
-        bottom: -2px;
-      }
-
-      .nav-link:hover::after,
-      .nav-link.active::after {
-        width: 100%;
-      }
-
-      h1,
-      h2 {
-        color: #1a124d;
-        margin-left: 20px;
-        font-weight: 600;
-      }
-
-      .btn-custom {
-        background-color: #1a124d;
-        color: #ffffff;
-        border-radius: 25px;
-        transition: background-color 0.4s ease;
-      }
-
-      .btn-custom:hover {
-        background-color: #afa5e0;
-        color: #ffffff;
-      }
-
-      .section-header {
-        background-color: #c6fff6;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-      }
-
-      .dollar-symbol {
-        margin-right: 5px;
-        font-size: 16px;
-        color: #666;
-      }
-
-      #transactionsAccountSelect {
-        margin-bottom: 20px;
-      }
-
-      #addAccountSection {
-        margin-bottom: 20px;
-      }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" />
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -119,6 +30,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="scripts.js" defer></script>
   </head>
 
   <body>
@@ -163,9 +77,7 @@
       </p>
     </div>
     <div class="container mt-4 d-none" id="accountsListSection">
-      <div class="section-header">
-        <h2>Your Accounts</h2>
-      </div>
+      <div class="section-header"><h2>Your Accounts</h2></div>
       <table class="table" id="accountTable">
         <thead>
           <tr>
@@ -178,9 +90,7 @@
       </table>
     </div>
     <div class="container mt-4 d-none" id="addAccountSection">
-      <div class="section-header">
-        <h2>Add Account</h2>
-      </div>
+      <div class="section-header"><h2>Add Account</h2></div>
       <form onsubmit="event.preventDefault(); addAccount()">
         <div class="form-group">
           <label for="accountNameInput">Account Name:</label>
@@ -209,9 +119,7 @@
       </form>
     </div>
     <div class="container mt-4 d-none" id="transferFundsSection">
-      <div class="section-header">
-        <h2>Transfer Funds</h2>
-      </div>
+      <div class="section-header"><h2>Transfer Funds</h2></div>
       <form onsubmit="event.preventDefault(); transferFunds()">
         <div class="form-group">
           <label for="fromAccountSelect">From Account:</label>
@@ -239,9 +147,7 @@
       </form>
     </div>
     <div class="container mt-4 d-none" id="transactionHistorySection">
-      <div class="section-header">
-        <h2>Transaction History</h2>
-      </div>
+      <div class="section-header"><h2>Transaction History</h2></div>
       <label for="transactionsAccountSelect">Account:</label>
       <select id="transactionsAccountSelect" class="form-control"></select>
       <table class="table" id="transactionTable">
@@ -290,282 +196,5 @@
         </div>
       </div>
     </div>
-    <script>
-      let accounts = [];
-      let transactionDataTable;
-      let accountsDataTable;
-
-      function initializeTransactionTable() {
-        transactionDataTable = $("#transactionTable").DataTable();
-      }
-
-      function initializeAccountsTable() {
-        accountsDataTable = $("#accountTable").DataTable();
-      }
-
-      function clearActiveLinks() {
-        document
-          .querySelectorAll(".nav-link")
-          .forEach((link) => link.classList.remove("active"));
-      }
-
-      function showSection(section) {
-        clearActiveLinks();
-        hideAllSections();
-        switch (section) {
-          case "main":
-            document.getElementById("mainContent").classList.remove("d-none");
-            break;
-          case "accounts":
-            document
-              .getElementById("accountsListSection")
-              .classList.remove("d-none");
-            document
-              .getElementById("addAccountSection")
-              .classList.remove("d-none");
-            getAccountsTable();
-            break;
-          case "transfer":
-            document
-              .getElementById("transferFundsSection")
-              .classList.remove("d-none");
-            populateAccountSelects();
-            break;
-          case "transactions":
-            document
-              .getElementById("transactionHistorySection")
-              .classList.remove("d-none");
-            populateTransactionsAccountSelect();
-            getTransactions(
-              document.getElementById("transactionsAccountSelect").value
-            );
-            break;
-        }
-        document
-          .querySelector(`.nav-link[href='#'][onclick*='${section}']`)
-          .classList.add("active");
-      }
-
-      function hideAllSections() {
-        [
-          "mainContent",
-          "accountsListSection",
-          "addAccountSection",
-          "transferFundsSection",
-          "transactionHistorySection",
-        ].forEach((id) => {
-          document.getElementById(id).classList.add("d-none");
-        });
-      }
-
-      function getAccounts() {
-        return fetch("/api/v1/accounts")
-          .then((response) => response.json())
-          .then((data) => {
-            accounts = data;
-          })
-          .catch((error) => console.error("Error:", error));
-      }
-
-      function getAccountsTable() {
-        getAccounts().then(() => {
-          accountsDataTable.clear();
-          accountsDataTable.rows.add(
-            accounts.map((account) => [
-              account.id,
-              account.name,
-              currencyFormat(account.balance),
-            ])
-          );
-          accountsDataTable.draw();
-        });
-      }
-
-      function currencyFormat(amount) {
-        return new Intl.NumberFormat("en-NZ", {
-          style: "currency",
-          currency: "NZD",
-        }).format(amount);
-      }
-
-      function getAccountsSelectOptions() {
-        getAccounts();
-        return accounts
-          .map(
-            (account) =>
-              `<option value="${account.id}">${account.id} - ${account.name}</option>`
-          )
-          .join("");
-      }
-
-      function populateAccountSelects() {
-        const selectElements = [
-          document.getElementById("fromAccountSelect"),
-          document.getElementById("toAccountSelect"),
-        ];
-        selectElements.forEach((select) => {
-          select.innerHTML = accounts
-            .map(
-              (account) =>
-                `<option value="${account.id}">${account.id} - ${account.name}</option>`
-            )
-            .join("");
-        });
-      }
-
-      function populateTransactionsAccountSelect() {
-        const selectElements = [
-          document.getElementById("transactionsAccountSelect"),
-        ];
-        const defaultAllOption = `<option value="">All</option>`;
-        selectElements.forEach((select) => {
-          select.innerHTML = defaultAllOption + getAccountsSelectOptions();
-        });
-      }
-
-      function addAccount() {
-        const account = {
-          name: document.getElementById("accountNameInput").value,
-          balance: parseFloat(
-            document.getElementById("initialBalanceInput").value
-          ),
-        };
-
-        fetch("/api/v1/account", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(account),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response
-                .text()
-                .then((errorText) => Promise.reject(new Error(errorText)));
-            }
-
-            return response.json();
-          })
-          .then(() => {
-            getAccountsTable();
-            resetForms();
-            showFeedbackModal("Account added successfully!", true);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            showFeedbackModal(
-              "An error occurred while adding the account",
-              false
-            );
-          });
-      }
-
-      function transferFunds() {
-        const transferData = {
-          fromAccountId: document.getElementById("fromAccountSelect").value,
-          toAccountId: document.getElementById("toAccountSelect").value,
-          amount: parseFloat(
-            document.getElementById("transferAmountInput").value
-          ),
-        };
-
-        fetch("/api/v1/transfer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(transferData),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response
-                .text()
-                .then((errorText) => Promise.reject(new Error(errorText)));
-            }
-
-            const contentType = response.headers.get("content-type");
-
-            if (contentType && contentType.includes("application/json")) {
-              return response.json();
-            } else {
-              return response.text();
-            }
-          })
-          .then((data) => {
-            resetForms();
-            showFeedbackModal(
-              typeof data === "string"
-                ? data
-                : "Transfer completed successfully!",
-              true
-            );
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            showFeedbackModal("An error occurred during the transfer", false);
-          });
-
-        getAccountsTable();
-        getTransactions();
-      }
-
-      function showFeedbackModal(message, isSuccess) {
-        const modalTitle = isSuccess ? "Success" : "Error";
-        const modalElement = $("#feedbackModal");
-
-        document.getElementById("feedbackModalLabel").textContent = modalTitle;
-        document.getElementById("feedbackMessage").textContent = message;
-
-        modalElement.modal("show");
-      }
-
-      function getTransactions(account = null) {
-        const fetchUrl = account
-          ? "/api/v1/transactions?account=" + account
-          : "/api/v1/transactions";
-        fetch(fetchUrl)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((transactions) => {
-            if (!Array.isArray(transactions)) {
-              throw new Error("Expected transactions to be an array");
-            }
-
-            transactionDataTable.clear();
-            transactionDataTable.rows.add(
-              transactions.map((transaction) => [
-                transaction.id,
-                transaction.fromAccountName,
-                transaction.toAccountName,
-                currencyFormat(transaction.amount),
-                new Date(transaction.date).toLocaleString(),
-              ])
-            );
-            transactionDataTable.draw();
-          })
-          .catch((error) => console.error("Error:", error));
-      }
-
-      function resetForms() {
-        document.getElementById("accountNameInput").value = "";
-        document.getElementById("initialBalanceInput").value = "";
-        document.getElementById("transferAmountInput").value = "";
-      }
-
-      populateTransactionsAccountSelect();
-      document
-        .getElementById("transactionsAccountSelect")
-        .addEventListener("change", function () {
-          getTransactions(
-            document.getElementById("transactionsAccountSelect").value
-          );
-        });
-
-      $(document).ready(function () {
-        initializeTransactionTable();
-        initializeAccountsTable();
-      });
-    </script>
   </body>
 </html>
