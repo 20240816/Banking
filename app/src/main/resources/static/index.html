@@ -7,7 +7,7 @@
     <link
       rel="icon"
       type="image/png"
-      href="https://img.icons8.com/arcade/64/pay.png"
+      href="https://img.icons8.com/pulsar-gradient/48/bank-building.png"
     />
     <link
       rel="stylesheet"
@@ -95,8 +95,29 @@
         font-size: 16px;
         color: #666;
       }
+
+      #transactionsAccountSelect {
+        margin-bottom: 20px;
+      }
+
+      #addAccountSection {
+        margin-bottom: 20px;
+      }
     </style>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css"
+    />
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+    <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </head>
 
@@ -135,8 +156,11 @@
       </div>
     </nav>
     <div class="container mt-4" id="mainContent">
-      <h1>Welcome to the Banking App</h1>
-      <p>This is a web application for managing bank accounts.</p>
+      <h1>Your Personal Banking Dashboard</h1>
+      <p>
+        Use the menu above to manage accounts, transfer funds, and view your
+        transaction history
+      </p>
     </div>
     <div class="container mt-4 d-none" id="accountsListSection">
       <div class="section-header">
@@ -159,8 +183,8 @@
       </div>
       <form onsubmit="event.preventDefault(); addAccount()">
         <div class="form-group">
-          <label for="accountNameInput">Account Name:</label
-          ><input
+          <label for="accountNameInput">Account Name:</label>
+          <input
             type="text"
             id="accountNameInput"
             class="form-control"
@@ -190,16 +214,12 @@
       </div>
       <form onsubmit="event.preventDefault(); transferFunds()">
         <div class="form-group">
-          <label for="fromAccountSelect">From Account:</label
-          ><select
-            id="fromAccountSelect"
-            class="form-control"
-            required
-          ></select>
+          <label for="fromAccountSelect">From Account:</label>
+          <select id="fromAccountSelect" class="form-control" required></select>
         </div>
         <div class="form-group">
-          <label for="toAccountSelect">To Account:</label
-          ><select id="toAccountSelect" class="form-control" required></select>
+          <label for="toAccountSelect">To Account:</label>
+          <select id="toAccountSelect" class="form-control" required></select>
         </div>
         <div class="form-group">
           <label for="transferAmountInput">Amount:</label>
@@ -272,6 +292,16 @@
     </div>
     <script>
       let accounts = [];
+      let transactionDataTable;
+      let accountsDataTable;
+
+      function initializeTransactionTable() {
+        transactionDataTable = $("#transactionTable").DataTable();
+      }
+
+      function initializeAccountsTable() {
+        accountsDataTable = $("#accountTable").DataTable();
+      }
 
       function clearActiveLinks() {
         document
@@ -338,20 +368,17 @@
       }
 
       function getAccountsTable() {
-        getAccounts();
-        const tableBody = document.getElementById("accountTableBody");
-        const tableBodyHtml =
-          accounts.length === 0
-            ? '<tr><td colspan="3" align="center">No accounts available</td></tr>'
-            : accounts
-                .map(
-                  (account) =>
-                    `<tr><td>${account.id}</td><td>${
-                      account.name
-                    }</td><td>${currencyFormat(account.balance)}</td></tr>`
-                )
-                .join("");
-        tableBody.innerHTML = tableBodyHtml;
+        getAccounts().then(() => {
+          accountsDataTable.clear();
+          accountsDataTable.rows.add(
+            accounts.map((account) => [
+              account.id,
+              account.name,
+              currencyFormat(account.balance),
+            ])
+          );
+          accountsDataTable.draw();
+        });
       }
 
       function currencyFormat(amount) {
@@ -505,23 +532,17 @@
               throw new Error("Expected transactions to be an array");
             }
 
-            const tableBody = document.getElementById("transactionTableBody");
-            tableBody.innerHTML =
-              transactions.length === 0
-                ? '<tr><td colspan="5" align="center">No transactions available</td></tr>'
-                : transactions
-                    .map(
-                      (transaction) => `
-                    <tr>
-                        <td>${transaction.id}</td>
-                        <td>${transaction.fromAccountName}</td>
-                        <td>${transaction.toAccountName}</td>
-                        <td>${currencyFormat(transaction.amount)}</td>
-                        <td>${new Date(transaction.date).toLocaleString()}</td>
-                    </tr>
-                `
-                    )
-                    .join("");
+            transactionDataTable.clear();
+            transactionDataTable.rows.add(
+              transactions.map((transaction) => [
+                transaction.id,
+                transaction.fromAccountName,
+                transaction.toAccountName,
+                currencyFormat(transaction.amount),
+                new Date(transaction.date).toLocaleString(),
+              ])
+            );
+            transactionDataTable.draw();
           })
           .catch((error) => console.error("Error:", error));
       }
@@ -540,6 +561,11 @@
             document.getElementById("transactionsAccountSelect").value
           );
         });
+
+      $(document).ready(function () {
+        initializeTransactionTable();
+        initializeAccountsTable();
+      });
     </script>
   </body>
 </html>
